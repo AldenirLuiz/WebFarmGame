@@ -1,0 +1,186 @@
+
+/* Grid */
+.grid {
+	display: grid;
+}
+
+.logo {
+	grid-area: logo;
+}
+
+.nav {
+	grid-area: nav;
+}
+
+.content {
+	grid-area: content;
+    background-color: #19d461a8;
+}
+
+.sidenav {
+	grid-area: sidenav;
+}
+
+.advert {
+	grid-area: advert;
+}
+
+.footer {
+	grid-area: footer;
+    background-color: #19d461a8;
+    display: flex;
+    justify-content: center;
+}
+
+.grid-template-areas{
+	grid-template-columns: 20% 50% 30%;
+	grid-template-rows: 10vh 75vh 15vh;
+	grid-template-areas:
+		"logo nav nav"
+		"content content sidenav"
+		"footer footer footer"
+		;
+}
+
+/* Grid Item */
+.item {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    gap: 2px;
+    border: 1px solid #ccc;
+	row-gap: 2px;
+	column-gap: 2px;
+	text-align: center;
+	font-size: 1.5em;
+}
+
+.grid {
+	margin: 0 auto;
+	border: 1px solid #ccc;
+}
+
+h1 {
+	text-align: center;
+	font-size: 1.25em;
+	font-weight: normal;
+}
+
+.tools {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    font-size: 1.25em;
+    font-weight: normal;
+    border: 1px dashed #ccc;
+    background-color: #f9f9f9;
+}
+
+body {
+	font-family: monospace;
+	color: #333;
+	padding-bottom: 0px;
+	margin: 0px;
+}
+
+body > div {
+	padding: 0px;
+}
+
+body > div:nth-of-type(even) {
+	background: rgba(0,0,0,.03);
+}
+
+body > div > img {
+	display: block;
+	margin: 0;
+    padding: 0;
+	max-width: 100%;
+}
+
+.content-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 240px);
+    gap: 15px;
+    justify-content: center;
+    align-content: center;
+    height: 100%;
+}
+.lote {
+    background: #8B5A2B; 
+    color: white; 
+    border-radius: 10px; 
+    display: flex; 
+    flex-direction: column; 
+    align-items: center; 
+    justify-content: center; 
+    font-weight: bold; 
+    cursor: pointer; 
+    width: 240px;
+    height: 140px; 
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    font-size: 15px; border: none;
+}
+.lote.PLANTADO { background: #DEB887; color: black; }
+.lote.PRONTO { background: #2E8B57; color: white; }
+.lote.BLOQUEADO { background: #7f8c8d; color: #bdc3c7; cursor: not-allowed; opacity: 0.6; }
+.lote.DISPONIVEL { background: #d35400; color: white; border: 2px dashed #e67e22; }
+.emoji-status { font-size: 32px; margin-bottom: 5px; }
+.tempo-txt { font-size: 11px; font-weight: normal; opacity: 0.8; }
+
+/* Estilo da barra e botões */
+.barra-capacidade { background: #eee; width: 100%; height: 8px; border-radius: 4px; margin-top: 5px; overflow: hidden; }
+.barra-preenchimento { background: #e67e22; width: 0%; height: 100%; transition: width 0.3s; }
+.botao-semente { background: white; border: 2px solid #ccc; padding: 10px; border-radius: 8px; font-weight: bold; cursor: pointer; height: 100%; width: 100%; }
+.botao-semente.ativa { border-color: #27ae60; background: #e8f8f5; }
+.botao-venda { background: #e67e22; color: white; border: none; padding: 8px; border-radius: 6px; cursor: pointer; font-weight: bold; width: 100%; margin-bottom: 5px;}
+.botao-venda:disabled { background: #bdc3c7; cursor: not-allowed; }
+#mensagem { font-size: 14px; color: #555; font-style: italic; margin-top: 10px; }
+
+/* Controladores de exibição das abas */
+.aba-painel { display: none; height: 100%; width: 100%; }
+.aba-painel.ativa { display: grid; } /* Mostra apenas a aba ativa */
+
+/* Estilo para os botões de troca de aba no cabeçalho ou menu */
+.btn-aba {
+    background: #e67e22; color: white; border: none; padding: 8px 15px;
+    border-radius: 5px; font-weight: bold; cursor: pointer; transition: 0.2s;
+}
+.btn-aba:hover { background: #d35400; }
+
+/* Estilo das Abas Verticais Conectadas */
+.btn-aba-vertical {
+    background: #7f8c8d;
+    color: #e0f0e0;
+    border: 1px solid #ccc;
+    border-right: none; /* Dá a impressão de encaixe no painel */
+    border-radius: 8px 0 0 8px;
+    font-size: 11px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.2s;
+    line-height: 1.3;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 2px;
+}
+.btn-aba-vertical:hover {
+    background: #95a5a6;
+    color: white;
+}
+.btn-aba-vertical.ativa {
+    background: #e67e22; /* Cor de destaque ativa */
+    color: white;
+    box-shadow: -2px 2px 5px rgba(0,0,0,0.15);
+    
+    z-index: 10;
+}
+
+/* Controladores de Exibição dos Painéis Internos */
+.aba-painel { display: none; height: 100%; width: 100%; }
+.aba-painel.ativa { display: block; }

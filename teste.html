@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Fazenda Paraíso</title>
+    
+    <title>Minha Fazendinha PyScript</title>
+  <link rel="stylesheet" href="offline/pyscript/core.css">
+  <script type="module" src="offline/pyscript/core.js"></script>
+    <!-- Link para o seu arquivo CSS separado -->
+    <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+    <!-- IMPORTANTE: O PyScript precisa buscar ambos os arquivos Python locais -->
+    <py-config>
+        [[fetch]]
+        files = ["fazenda_logica.py", "game.py"]
+    </py-config>
+
+    <!-- Grid Layout combinando seu CSS -->
+    <div class="grid grid-template-areas">
+        
+        <!-- LOGO -->
+        <div class="item logo">
+            <span style="font-size: 30px;">🌾</span>
+        </div>
+
+        <!-- NAV -->
+        <div class="item nav" style="justify-content: space-around;">
+            <h2>Fazenda Paraíso</h2>
+            <div>💰 Moedas: $<span id="txt-moedas">50</span></div>
+            <div>⏰ Horário</div>
+        </div>
+
+        <!-- CONTENT (Os 6 Lotes de terra) -->
+       <!-- CONTENT (Área central que alterna os painéis) -->
+<!-- CONTENT (Área central reformulada com Abas Verticais Laterais) -->
+<div class="content" style="background-color: transparent; border: none; display: grid; grid-template-columns: 50px 1fr; gap: 5px; height: 100%;">
+    
+    <!-- COLUNA DAS ABAS VERTICAIS (Alinhadas com as 3 linhas do Grid) -->
+    <div style="display: grid; grid-template-rows: repeat(3, 1fr); gap: 10px; height: 100%;">
+        <button id="btn-aba-fazenda" class="btn-aba-vertical ativa" title="Plantação">🌾<br>C<br>A<br>M<br>P<br>O</button>
+        <button id="btn-aba-cozinha" class="btn-aba-vertical" title="Cozinha">🍳<br>C<br>O<br>Z<br>I</button>
+        <button id="btn-aba-curral" class="btn-aba-vertical" title="Curral Futuro">🐄<br>C<br>U<br>R<br>R</button>
+    </div>
+
+    <!-- COLUNA DAS TELAS INTERNAS (Onde o jogo renderiza) -->
+    <div style="background-color: #19d461a8; border-radius: 8px; border: 1px solid #ccc; padding: 0px; height: 100%;">
+        
+        <!-- ABA 1: Plantação -->
+        <div id="painel-plantacao" class="aba-painel ativa">
+            <div class="content-grid">
+                <button id="lote-1" class="lote VAZIO"></button>
+                <button id="lote-2" class="lote BLOQUEADO"></button>
+                <button id="lote-3" class="lote BLOQUEADO"></button>
+                <button id="lote-4" class="lote BLOQUEADO"></button>
+                <button id="lote-5" class="lote BLOQUEADO"></button>
+                <button id="lote-6" class="lote BLOQUEADO"></button>
+                <button id="lote-7" class="lote BLOQUEADO"></button>
+                <button id="lote-8" class="lote BLOQUEADO"></button>
+                <button id="lote-9" class="lote BLOQUEADO"></button>
+            </div>
+        </div>
+
+        <!-- ABA 2: Cozinha -->
+        <div id="painel-cozinha" class="aba-painel">
+            <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; color: white; padding: 10px; font-family: monospace; height: 100%;">
+                <h2 style="margin-bottom: 10px; font-size: 22px;">🍳 Cozinha da Fazenda</h2>
+                <p style="font-size: 13px; margin-bottom: 15px;">Use seus ingredientes para criar receitas valiosas!</p>
+                
+                <div style="background: white; color: #333; padding: 0px; border-radius: 8px; display: flex; align-items: center; gap: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); width: 100%; max-width: 400px; justify-content: space-between;">
+                    <div style="text-align: left;">
+                        <div style="font-weight: bold; font-size: 16px;">🥗 Salada de Tomate</div>
+                        <div style="font-size: 12px; color: #7f8c8d;">Requer: 2x 🍅 Tomate</div>
+                        <div style="font-size: 12px; color: #27ae60; font-weight: bold;">Preço de Venda: $160</div>
+                    </div>
+                    <button id="btn-craft-salada" class="botao-venda" style="margin: 0; width: auto; padding: 10px 15px;">Cozinhar</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ABA 3: Curral (Estrutura futura pronta) -->
+        <div id="painel-curral" class="aba-painel">
+            <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; color: white; padding: 10px; font-family: monospace; height: 100%;">
+                <h2 style="margin-bottom: 10px; font-size: 22px;">🐄 Curral Paraíso</h2>
+                <p style="font-size: 14px; margin-bottom: 15px; opacity: 0.9;">Espaço reservado para os seus futuros animais!</p>
+                <div style="border: 2px dashed rgba(255,255,255,0.5); padding: 30px; border-radius: 10px; font-size: 16px;">
+                    🚧 Em Construção... 🐓🐑
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+        <!-- SIDENAV (Armazém, Mercado e Logs) -->
+        <div class="item sidenav" style="flex-direction: column; justify-content: flex-start; padding: 15px; text-align: left; align-items: stretch;">
+            <h3 style="font-size: 18px; margin-bottom: 5px;">📦 Armazém (<span id="txt-total-estoque">0</span>/<span id="txt-max-estoque">20</span>)</h3>
+            <div style="font-size: 14px; margin-bottom: 5px;">🌾 Trigos: <span id="estoque-trigo">0</span></div>
+            <div style="font-size: 14px; margin-bottom: 10px;">🍅 Tomates: <span id="estoque-tomate">0</span></div>
+            <div style="font-size: 14px; margin-bottom: 10px;">🫘 Feijões: <span id="estoque-feijao">0</span></div>
+            <div class="barra-capacidade"><div id="barra-progresso" class="barra-preenchimento"></div></div>
+            
+            <hr style="margin: 15px 0; border: 0; border-top: 1px solid #ccc;">
+            
+            <h3 style="font-size: 18px; margin-bottom: 10px;">🏪 Loja</h3>
+            <button id="vender-trigo" class="botao-venda">Vender Trigo (+$25)</button>
+            <button id="vender-tomate" class="botao-venda">Vender Tomate (+$65)</button>
+            <button id="vender-feijao" class="botao-venda">Vender Feijão (+$120)</button>
+            
+            <div id="mensagem">Bem-vindo à Fazenda Paraíso!</div>
+        </div>
+
+                <!-- FOOTER (Barra de ferramentas das sementes e abas) -->
+        <div class="footer">
+            <div class="tools"><button id="btn-trigo" class="botao-semente ativa">🌾 Trigo ($10)</button></div>
+            <div class="tools"><button id="btn-tomate" class="botao-semente">🍅 Tomate ($25)</button></div>
+            <div class="tools"><button id="btn-feijao" class="botao-semente">🫘 Feijão ($50)</button></div>
+            
+            <!-- NOVOS BOTÕES DE NAVEGAÇÃO DE ABAS -->
+            <div class="tools"><button id="btn-aba-fazenda" class="btn-aba">🌾 Ir para Campo</button></div>
+            <div class="tools"><button id="btn-aba-cozinha" class="btn-aba">🍳 Ir para Cozinha</button></div>
+            
+            <div class="tools">tool-6</div>
+        </div>
+
+    </div>
+
+    <!-- Inicializa o script controlador da lógica visual -->
+        <!-- O caractere '?' força o navegador a baixar o arquivo do zero -->
+    <script type="py" src="game.py?v=2" async></script>
+
+
+</body>
+</html>
