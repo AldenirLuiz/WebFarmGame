@@ -15,6 +15,11 @@
 .content {
 	grid-area: content;
     background-color: #19d461a8;
+    border: none; 
+    display: grid; 
+    grid-template-columns: 50px 1fr; 
+    gap: 0px; 
+    height: 100%;
 }
 
 .sidenav {
@@ -48,7 +53,6 @@
     justify-content: space-around;
     align-items: center;
     gap: 2px;
-    border: 1px solid #ccc;
 	row-gap: 2px;
 	column-gap: 2px;
 	text-align: center;
@@ -57,7 +61,6 @@
 
 .grid {
 	margin: 0 auto;
-	border: 1px solid #ccc;
 }
 
 h1 {
@@ -174,7 +177,7 @@ body > div > img {
     color: white;
 }
 .btn-aba-vertical.ativa {
-    background: #e67e22; /* Cor de destaque ativa */
+    background: #19d461a8; /* Cor de destaque ativa */
     color: white;
     box-shadow: -2px 2px 5px rgba(0,0,0,0.15);
     
@@ -184,3 +187,13 @@ body > div > img {
 /* Controladores de Exibição dos Painéis Internos */
 .aba-painel { display: none; height: 100%; width: 100%; }
 .aba-painel.ativa { display: block; }
+
+.texto-vertical {
+  writing-mode: vertical-rl;
+  text-orientation: sideways-right;
+  text-align: center;
+  text-autospace: ideograph-numeric;
+  font-size: 12px;
+  font-weight: bold;
+
+}
