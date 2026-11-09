@@ -170,3 +170,184 @@ class Fogao:
             f"{receita.emoji} {receita.nome} preparado e vendido por "
             f"{receita.valor_venda} moedas!"
         )
+
+
+class Animal:
+    def __init__(
+        self, chave, nome, emoji, custo, alimento, intervalo_alimentacao,
+        tempo_crescimento, tempo_reproducao, capacidade, valor_venda
+    ):
+        self.chave = chave
+        self.nome = nome
+        self.emoji = emoji
+        self.custo = custo
+        self.alimento = alimento
+        self.intervalo_alimentacao = intervalo_alimentacao
+        self.tempo_crescimento = tempo_crescimento
+        self.tempo_reproducao = tempo_reproducao
+        self.capacidade = capacidade
+        self.valor_venda = valor_venda
+
+
+class Curral:
+    def __init__(self, id_curral, comprado=False):
+        self.id_curral = id_curral
+        self.comprado = comprado
+        self.animal = None
+        self.animais = []
+        self.alimentado = False
+        self.ultima_atualizacao = time()
+        self.proxima_alimentacao = None
+        self.proxima_reproducao = None
+
+    def comprar_animal(self, animal, jogador):
+        if not self.comprado:
+            return False, "Esta baia ainda não foi comprada."
+        if self.animais:
+            return False, "Esta baia já tem animais."
+        if jogador.moedas < animal.custo:
+            return False, "Moedas insuficientes para comprar este animal."
+
+        jogador.moedas -= animal.custo
+        self.animal = animal
+        self.animais = [0.0]
+        self.alimentado = False
+        self.ultima_atualizacao = time()
+        self.proxima_alimentacao = self.ultima_atualizacao
+        self.proxima_reproducao = None
+        return True, f"{animal.emoji} {animal.nome} chegou ao curral!"
+
+    def adicionar_animal(self, jogador):
+        if self.animal is None:
+            return False, "Escolha um animal para esta baia primeiro."
+        if len(self.animais) >= self.animal.capacidade:
+            return False, "Esta baia já atingiu sua capacidade."
+        if jogador.moedas < self.animal.custo:
+            return False, "Moedas insuficientes para comprar este animal."
+
+        jogador.moedas -= self.animal.custo
+        self.animais.append(0.0)
+        self.alimentado = False
+        self.ultima_atualizacao = time()
+        self.proxima_alimentacao = self.ultima_atualizacao
+        return True, f"Mais um(a) {self.animal.nome} chegou ao curral!"
+
+    def adultos(self):
+        if self.animal is None:
+            return 0
+        return sum(
+            idade >= self.animal.tempo_crescimento
+            for idade in self.animais
+        )
+
+    def processar_ciclo(self, jogador, agora=None):
+        if not self.comprado or self.animal is None:
+            return []
+
+        agora = time() if agora is None else agora
+        if self.proxima_alimentacao is None:
+            self.proxima_alimentacao = agora
+            self.alimentado = False
+        eventos = []
+        while self.ultima_atualizacao < agora:
+            if self.alimentado:
+                limite = min(agora, self.proxima_alimentacao)
+                decorrido = limite - self.ultima_atualizacao
+                if decorrido > 0:
+                    self.animais = [
+                        idade + decorrido for idade in self.animais
+                    ]
+                    self.ultima_atualizacao = limite
+
+                if limite < self.proxima_alimentacao:
+                    break
+
+            else:
+                if self.proxima_alimentacao > agora:
+                    self.ultima_atualizacao = agora
+                    break
+                self.ultima_atualizacao = self.proxima_alimentacao
+
+            alimentacao = {
+                item: quantidade * len(self.animais)
+                for item, quantidade in self.animal.alimento.items()
+            }
+            tem_alimento = all(
+                jogador.armazem.get(item, 0) >= quantidade
+                for item, quantidade in alimentacao.items()
+            )
+            estava_alimentado = self.alimentado
+            if tem_alimento:
+                for item, quantidade in alimentacao.items():
+                    jogador.armazem[item] -= quantidade
+                self.alimentado = True
+                self.proxima_alimentacao += (
+                    self.animal.intervalo_alimentacao
+                )
+            else:
+                self.alimentado = False
+                self.proxima_alimentacao = (
+                    self.ultima_atualizacao
+                    + self.animal.intervalo_alimentacao
+                )
+                if estava_alimentado or not eventos:
+                    itens = ", ".join(
+                        f"{quantidade} {item}"
+                        for item, quantidade in alimentacao.items()
+                    )
+                    eventos.append(
+                        f"{self.animal.nome}: alimento insuficiente "
+                        f"({itens}); crescimento pausado."
+                    )
+
+        adultos = self.adultos()
+        if adultos < 2:
+            self.proxima_reproducao = None
+        elif self.proxima_reproducao is None:
+            self.proxima_reproducao = agora + self.animal.tempo_reproducao
+        elif (
+            self.alimentado
+            and len(self.animais) < self.animal.capacidade
+            and agora >= self.proxima_reproducao
+        ):
+            self.animais.append(0.0)
+            self.proxima_reproducao = agora + self.animal.tempo_reproducao
+            eventos.append(
+                f"Nasceu um filhote de {self.animal.nome} no curral "
+                f"{self.id_curral}!"
+            )
+
+        return eventos
+
+    def tempo_para_crescer(self, agora=None):
+        if self.animal is None or not self.animais:
+            return 0
+        agora = time() if agora is None else agora
+        idade = min(self.animais)
+        if idade >= self.animal.tempo_crescimento:
+            return 0
+        restante = self.animal.tempo_crescimento - idade
+        if self.alimentado and self.proxima_alimentacao is not None:
+            restante += max(0, self.proxima_alimentacao - agora)
+        return max(0, int(restante + 0.999))
+
+    def vender_adulto(self, jogador):
+        if self.animal is None or self.adultos() == 0:
+            return False, "Ainda não há animais adultos para vender."
+        nome_animal = self.animal.nome
+        valor_venda = self.animal.valor_venda
+        self.animais.remove(
+            next(
+                idade for idade in self.animais
+                if idade >= self.animal.tempo_crescimento
+            )
+        )
+        jogador.moedas += valor_venda
+        if not self.animais:
+            self.animal = None
+            self.alimentado = False
+            self.proxima_alimentacao = None
+            self.proxima_reproducao = None
+        return True, (
+            f"{nome_animal} vendido por {valor_venda} moedas."
+        )

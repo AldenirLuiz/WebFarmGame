@@ -35,12 +35,18 @@
                 <nav class="world-tabs" aria-label="Áreas da fazenda">
                     <button id="btn-aba-fazenda" class="world-tab ativa" type="button">
                         <span>🌱</span> Campo
+                        <span class="tab-notificacao" aria-hidden="true" hidden></span>
+                        <span class="tab-aviso" role="status" hidden></span>
                     </button>
                     <button id="btn-aba-cozinha" class="world-tab" type="button">
                         <span>🍳</span> Cozinha
+                        <span class="tab-notificacao" aria-hidden="true" hidden></span>
+                        <span class="tab-aviso" role="status" hidden></span>
                     </button>
                     <button id="btn-aba-curral" class="world-tab" type="button">
                         <span>🐄</span> Curral
+                        <span class="tab-notificacao" aria-hidden="true" hidden></span>
+                        <span class="tab-aviso" role="status" hidden></span>
                     </button>
                 </nav>
 
@@ -53,6 +59,10 @@
                                 <p>Cuide das plantações e colha no tempo certo.</p>
                             </div>
                             <span class="heading-art" aria-hidden="true">🌤️</span>
+                        </div>
+                        <div class="progress-summary">
+                            <span>🌿 <strong id="txt-lotes-comprados">1</strong> lotes abertos</span>
+                            <span>Desbloqueie novos espaços com moedas</span>
                         </div>
                         <div class="content-grid field-grid" aria-label="Lotes de plantação">
                             <button id="lote-1" class="lote VAZIO" type="button"></button>
@@ -94,13 +104,31 @@
                     </section>
 
                     <section id="painel-curral" class="aba-painel">
-                        <div class="barn-empty">
-                            <span aria-hidden="true">🐄</span>
-                            <span class="eyebrow">EM BREVE</span>
-                            <h1>Curral Paraíso</h1>
-                            <p>Um espaço aconchegante para os futuros moradores da fazenda.</p>
-                            <div class="coming-soon">🚧 Em construção · 🐓 🐑</div>
+                        <div class="section-heading">
+                            <div>
+                                <span class="eyebrow">CUIDADO E CARINHO</span>
+                                <h1>Seu curral</h1>
+                                <p>A ração do estoque é consumida em ciclos para fazê-los crescer.</p>
+                            </div>
+                            <span class="heading-art" aria-hidden="true">🐄</span>
                         </div>
+                        <div class="progress-summary">
+                            <span>🐾 <strong id="txt-currais-comprados">1</strong> baias abertas</span>
+                            <span>Com dois adultos e espaço, a baia ganha filhotes</span>
+                        </div>
+                        <div class="content-grid curral-grid" aria-label="Baias de animais">
+                            <button id="curral-1" class="curral VAZIO" type="button"></button>
+                            <button id="curral-2" class="curral BLOQUEADO" type="button"></button>
+                            <button id="curral-3" class="curral BLOQUEADO" type="button"></button>
+                            <button id="curral-4" class="curral BLOQUEADO" type="button"></button>
+                            <button id="curral-5" class="curral BLOQUEADO" type="button"></button>
+                            <button id="curral-6" class="curral BLOQUEADO" type="button"></button>
+                            <button id="curral-7" class="curral BLOQUEADO" type="button"></button>
+                            <button id="curral-8" class="curral BLOQUEADO" type="button"></button>
+                            <button id="curral-9" class="curral BLOQUEADO" type="button"></button>
+                        </div>
+                        <div id="seletor-animais" class="seletor-flutuante"
+                             role="dialog" aria-label="Gerenciar animais"></div>
                     </section>
                 </div>
 
@@ -149,6 +177,6 @@
         </main>
     </div>
 
-    <script type="py" src="game.py?v=6" async></script>
+    <script type="py" src="game.py?v=9" async></script>
 </body>
 </html>

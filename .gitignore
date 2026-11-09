@@ -6,6 +6,11 @@
 __pycache__/
 *.py[cod]
 *$py.class
+/node_modules/
+/www/
+/android/.gradle/
+/android/build/
+/android/app/build/
 
 # C extensions
 *.so

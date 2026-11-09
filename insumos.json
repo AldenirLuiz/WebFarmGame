@@ -65,5 +65,53 @@
             "cook_time": 8,
             "emoji": "🥖"
         }
+    ],
+    "progression": {
+        "plot_base_cost": 200,
+        "corral_base_cost": 250
+    },
+    "animals": [
+        {
+            "key": "Galinha",
+            "name": "Galinha",
+            "emoji": "🐔",
+            "cost": 40,
+            "feed": {
+                "Trigo": 1
+            },
+            "feed_interval": 15,
+            "growth_time": 45,
+            "reproduction_time": 80,
+            "max_per_corral": 4,
+            "sale_value": 110
+        },
+        {
+            "key": "Ovelha",
+            "name": "Ovelha",
+            "emoji": "🐑",
+            "cost": 100,
+            "feed": {
+                "Feijao": 1
+            },
+            "feed_interval": 20,
+            "growth_time": 60,
+            "reproduction_time": 100,
+            "max_per_corral": 4,
+            "sale_value": 550
+        },
+        {
+            "key": "Vaca",
+            "name": "Vaca",
+            "emoji": "🐄",
+            "cost": 180,
+            "feed": {
+                "Arroz": 1
+            },
+            "feed_interval": 30,
+            "growth_time": 90,
+            "reproduction_time": 140,
+            "max_per_corral": 4,
+            "sale_value": 620
+        }
     ]
 }
