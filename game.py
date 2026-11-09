@@ -25,6 +25,20 @@ receita_salada = Receita(
     emoji="🥗"
 )
 
+receita_feijao = Receita(
+    nome="Feijão Cozido", 
+    ingredientes_requeridos={"Feijao": 4}, 
+    valor_venda=300, 
+    emoji="🍲"
+)
+
+receita_pao = Receita(
+    nome="Pão de Trigo", 
+    ingredientes_requeridos={"Trigo": 8}, 
+    valor_venda=100, 
+    emoji="🥖"
+)
+
 # Criados os 9 lotes conforme seu arquivo atualizado
 lotes = [
     LoteTerra(1, comprado=True),
