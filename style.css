@@ -127,10 +127,6 @@ body > div > img {
     box-shadow: 0 4px 6px rgba(0,0,0,0.1);
     font-size: 15px; border: none;
 }
-.lote.PLANTADO { background: #DEB887; color: black; }
-.lote.PRONTO { background: #2E8B57; color: white; }
-.lote.BLOQUEADO { background: #7f8c8d; color: #bdc3c7; cursor: not-allowed; opacity: 0.6; }
-.lote.DISPONIVEL { background: #d35400; color: white; border: 2px dashed #e67e22; }
 .emoji-status { font-size: 32px; margin-bottom: 5px; }
 .tempo-txt { font-size: 11px; font-weight: normal; opacity: 0.8; }
 
@@ -197,3 +193,72 @@ body > div > img {
   font-weight: bold;
 
 }
+
+
+.lote.PLANTADO { 
+    transition: all 1.6s;
+    /* Cor base: marrom terra profundo */
+  background-color: #a1cf37;
+  
+  /* Camada 1: Efeito de sulcos/linhas do arado (Gradiente Repetitivo) */
+  /* Camada 2: Ruído procedural em SVG para dar textura de areia/terra */
+  background-image: 
+    repeating-linear-gradient(
+      0deg,
+      rgba(136, 130, 41, 0.8) 10px,
+      rgba(158, 122, 91, 0.8) 20px,
+      rgba(99, 158, 21, 0.6) 20px,
+      rgba(72, 240, 6, 0.6) 30px
+    ),
+    url("data:image/svg+xml,%3Csvg viewBox='0 0 140 100' xmlns='http://w3.org' id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+  
+  /* Mistura as camadas para o ruído penetrar nas linhas */
+  background-blend-mode: color-burn;
+  opacity: 0.95;
+ }
+.lote.PRONTO { 
+    transition: all 1.6s;
+    /* Cor base: marrom terra profundo */
+  background-color: #d6d84e;
+  
+  /* Camada 1: Efeito de sulcos/linhas do arado (Gradiente Repetitivo) */
+  /* Camada 2: Ruído procedural em SVG para dar textura de areia/terra */
+  background-image: 
+    repeating-linear-gradient(
+      0deg,
+      rgba(102, 40, 4, 0.8) 10px,
+      rgba(180, 87, 6, 0.8) 20px,
+      rgba(118, 192, 22, 0.6) 20px,
+      rgba(241, 206, 7, 0.6) 30px
+    ),
+    url("data:image/svg+xml,%3Csvg viewBox='0 0 140 100' xmlns='http://w3.org' id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+  
+  /* Mistura as camadas para o ruído penetrar nas linhas */
+  background-blend-mode: color-burn;
+  opacity: 0.95;
+ }
+.lote.VAZIO {
+    transition: all 0.6s;
+    /* Cor base: marrom terra profundo */
+  background-color: #533f06;
+  
+  /* Camada 1: Efeito de sulcos/linhas do arado (Gradiente Repetitivo) */
+  /* Camada 2: Ruído procedural em SVG para dar textura de areia/terra */
+  background-image: 
+    repeating-linear-gradient(
+      0deg,
+      rgba(71, 36, 16, 0.8) 10px,
+      rgba(104, 53, 8, 0.8) 20px,
+      rgba(92, 121, 54, 0.6) 20px,
+      rgba(241, 206, 7, 0.6) 30px
+    ),
+    url("data:image/svg+xml,%3Csvg viewBox='0 0 140 100' xmlns='http://w3.org' id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+  
+  /* Mistura as camadas para o ruído penetrar nas linhas */
+  background-blend-mode: color-burn;
+  opacity: 0.95;
+}
+
+
+.lote.BLOQUEADO { background: #7f8c8d; color: #bdc3c7; cursor: not-allowed; opacity: 0.6; }
+.lote.DISPONIVEL { background: #d35400; color: white; border: 2px dashed #e67e22; }

@@ -13,6 +13,11 @@ tomate = Planta("Tomate", tempo_crescimento=25, custo=25, valor_venda=65, emoji=
 feijao = Planta("Feijao", tempo_crescimento=50, custo=50, valor_venda=120, emoji="🫘")
 semente_selecionada = trigo
 
+PLANTAS_POR_NOME = {
+    planta.nome: planta
+    for planta in [trigo, tomate, feijao]
+}
+
 receita_salada = Receita(
     nome="Salada de Tomate", 
     ingredientes_requeridos={"Tomate": 2}, 
@@ -44,33 +49,109 @@ def preco_lote(id_lote):
 
 # --- Sistema de Persistência (Save/Load) ---
 def carregar_jogo():
-    save_data = window.localStorage.getItem("fazenda_paraiso_save")
-    if save_data is not None:
-        try:
-            dados = json.loads(save_data)
-            jogador.moedas = dados["moedas"]
-            jogador.armazem = dados["armazem"]
-            
-            for i, comprado in enumerate(dados["lotes_comprados"]):
-                if i < len(lotes):
-                    lotes[i].comprado = comprado
-                    if comprado and lotes[i].estado == "BLOQUEADO":
-                        lotes[i].estado = "VAZIO"
-            
-            mostrar_mensagem("Progresso carregado com sucesso!")
-            atualizar_tela()
-        except Exception as e:
-            mostrar_mensagem("Erro ao carregar o save antigo.")
+    save_data = window.localStorage.getItem(
+        "fazenda_paraiso_save"
+    )
 
+    if save_data is None:
+        return
+
+    try:
+        dados = json.loads(save_data)
+
+        # Restaura os dados básicos
+        jogador.moedas = int(dados["moedas"])
+
+        jogador.armazem = {
+            nome: int(dados.get("armazem", {}).get(nome, 0))
+            for nome in ["Trigo", "Tomate", "Feijao"]
+        }
+
+        # Compatibilidade com o formato antigo
+        lotes_salvos = dados.get("lotes")
+
+        if lotes_salvos is None:
+            antigos = dados.get("lotes_comprados", [])
+
+            for i, lote in enumerate(lotes):
+                comprado = (
+                    bool(antigos[i])
+                    if i < len(antigos) else lote.id_lote == 1
+                )
+
+                lote.comprado = comprado
+                lote.estado = "VAZIO" if comprado else "BLOQUEADO"
+                lote.planta_atual = None
+                lote.timestamp_plantio = None
+
+        else:
+            for i, lote in enumerate(lotes):
+
+                if i >= len(lotes_salvos):
+                    continue
+
+                salvo = lotes_salvos[i]
+
+                lote.comprado = salvo["comprado"]
+
+                if not lote.comprado:
+                    lote.estado = "BLOQUEADO"
+                    lote.planta_atual = None
+                    lote.timestamp_plantio = None
+                    continue
+
+                estado = salvo["estado"]
+
+                if estado == "PLANTADO" or estado == "PRONTO":
+                    nome_planta = salvo["planta"]
+
+                    lote.planta_atual = PLANTAS_POR_NOME[nome_planta]
+                    lote.timestamp_plantio = float(
+                        salvo["timestamp_plantio"]
+                    )
+
+                    lote.estado = estado
+
+                    # Verifica se amadureceu enquanto
+                    # o navegador estava fechado
+                    lote.checar_crescimento()
+
+                else:
+                    lote.estado = "VAZIO"
+                    lote.planta_atual = None
+                    lote.timestamp_plantio = None
+
+        atualizar_tela()
+        mostrar_mensagem("Progresso carregado com sucesso!")
+
+    except Exception as e:
+        print("Erro ao carregar jogo:", e)
+        mostrar_mensagem("Erro ao carregar o salvamento.")
+        
 def salvar_jogo():
     dados_salvamento = {
+        "versao": 2,
         "moedas": jogador.moedas,
         "armazem": jogador.armazem,
-        "lotes_comprados": [lote.comprado for lote in lotes]
+        "lotes": [
+            {
+                "id": lote.id_lote,
+                "comprado": lote.comprado,
+                "estado": lote.estado,
+                "planta": (
+                    lote.planta_atual.nome
+                    if lote.planta_atual else None
+                ),
+                "timestamp_plantio": lote.timestamp_plantio
+            }
+            for lote in lotes
+        ]
     }
-    window.localStorage.setItem("fazenda_paraiso_save", json.dumps(dados_salvamento))
-    mostrar_mensagem("Jogo salvo automaticamente!")
 
+    window.localStorage.setItem(
+        "fazenda_paraiso_save",
+        json.dumps(dados_salvamento)
+    )
 # --- Lógica de Seleção de Cultivos ---
 def selecionar_semente(planta):
     global semente_selecionada
@@ -155,6 +236,9 @@ def ao_clicar_no_lote(event):
         if lote.estado == "VAZIO":
             sucesso, mensagem = lote.plantar(semente_selecionada, jogador)
             mostrar_mensagem(mensagem)
+
+            if sucesso:
+                salvar_jogo()
         elif lote.estado == "PLANTADO":
             mostrar_mensagem(f"{lote.planta_atual.nome} está crescendo. Faltam {lote.tempo_restante()} segundos.")
         elif lote.estado == "PRONTO":
