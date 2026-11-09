@@ -1,0 +1,69 @@
+{
+    "plants": [
+        {
+            "id": 1,
+            "key": "Trigo",
+            "name": "Trigo",
+            "emoji": "🌾",
+            "cost": 10,
+            "time_to_harvest": 30,
+            "sale_value": 25
+        },
+        {
+            "id": 2,
+            "key": "Tomate",
+            "name": "Tomate",
+            "emoji": "🍅",
+            "cost": 25,
+            "time_to_harvest": 60,
+            "sale_value": 65
+        },
+        {
+            "id": 3,
+            "key": "Feijao",
+            "name": "Feijão",
+            "emoji": "🫘",
+            "cost": 50,
+            "time_to_harvest": 90,
+            "sale_value": 120
+        },
+        {
+            "id": 4,
+            "key": "Arroz",
+            "name": "Arroz",
+            "emoji": "🍚",
+            "cost": 75,
+            "time_to_harvest": 120,
+            "sale_value": 180
+        }
+    ],
+    "recipes": [
+        {
+            "name": "Salada de Tomate",
+            "ingredients": {
+                "Tomate": 2
+            },
+            "sale_value": 160,
+            "cook_time": 5,
+            "emoji": "🥗"
+        },
+        {
+            "name": "Feijão Cozido",
+            "ingredients": {
+                "Feijao": 4
+            },
+            "sale_value": 300,
+            "cook_time": 10,
+            "emoji": "🍲"
+        },
+        {
+            "name": "Pão de Trigo",
+            "ingredients": {
+                "Trigo": 8
+            },
+            "sale_value": 100,
+            "cook_time": 8,
+            "emoji": "🥖"
+        }
+    ]
+}

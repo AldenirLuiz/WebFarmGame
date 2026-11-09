@@ -2,132 +2,153 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#f5f4e9">
     <title>Fazenda Paraíso</title>
-    
-    <title>Minha Fazendinha PyScript</title>
-  <link rel="stylesheet" href="offline/pyscript/core.css">
-  <script type="module" src="offline/pyscript/core.js"></script>
-    <!-- Link para o seu arquivo CSS separado -->
-    <link rel="stylesheet" href="style.css" />
+    <link rel="stylesheet" href="offline/pyscript/core.css">
+    <link rel="stylesheet" href="style.css">
+    <script type="module" src="offline/pyscript/core.js"></script>
 </head>
 <body>
-
-    <!-- IMPORTANTE: O PyScript precisa buscar ambos os arquivos Python locais -->
     <py-config>
         [[fetch]]
-        files = ["fazenda_logica.py", "game.py"]
+        files = ["fazenda_logica.py", "game.py", "insumos.json"]
     </py-config>
 
-    <!-- Grid Layout combinando seu CSS -->
-    <div class="grid grid-template-areas">
-        
-        <!-- LOGO -->
-        <div class="item logo">
-            <span style="font-size: 30px;">🌾</span>
-        </div>
-
-        <!-- NAV -->
-        <div class="item nav" style="justify-content: space-around;">
-            <h2>Fazenda Paraíso</h2>
-            <div>💰 Moedas: $<span id="txt-moedas">50</span></div>
-            <div>⏰ Horário</div>
-        </div>
-
-        <!-- CONTENT (Os 6 Lotes de terra) -->
-       <!-- CONTENT (Área central que alterna os painéis) -->
-<!-- CONTENT (Área central reformulada com Abas Verticais Laterais) -->
-<div class="content" >
-    
-    <!-- COLUNA DAS ABAS VERTICAIS (Alinhadas com as 3 linhas do Grid) -->
-    <div style="display: grid; grid-template-rows: repeat(3, 1fr); gap: 0px; height: 100%;">
-        <button id="btn-aba-fazenda" class="btn-aba-vertical ativa texto-vertical" title="Plantação">🌾CAMPO</button>
-        <button id="btn-aba-cozinha" class="btn-aba-vertical texto-vertical" title="Cozinha">🍳COZINHA</button>
-        <button id="btn-aba-curral" class="btn-aba-vertical texto-vertical" title="Curral Futuro">🐄CURRAL</button>
-    </div>
-
-    <!-- COLUNA DAS TELAS INTERNAS (Onde o jogo renderiza) -->
-    <div style="background-color: #19d461a8; padding: 0px; height: 100%;">
-        
-        <!-- ABA 1: Plantação -->
-        <div id="painel-plantacao" class="aba-painel ativa">
-            <div class="content-grid">
-                <button id="lote-1" class="lote VAZIO"></button>
-                <button id="lote-2" class="lote BLOQUEADO"></button>
-                <button id="lote-3" class="lote BLOQUEADO"></button>
-                <button id="lote-4" class="lote BLOQUEADO"></button>
-                <button id="lote-5" class="lote BLOQUEADO"></button>
-                <button id="lote-6" class="lote BLOQUEADO"></button>
-                <button id="lote-7" class="lote BLOQUEADO"></button>
-                <button id="lote-8" class="lote BLOQUEADO"></button>
-                <button id="lote-9" class="lote BLOQUEADO"></button>
+    <div class="game-shell">
+        <header class="topbar">
+            <a class="brand" href="#" aria-label="Fazenda Paraíso - início">
+                <span class="brand-icon">🌾</span>
+                <span>
+                    <strong>Fazenda Paraíso</strong>
+                    <small>um cantinho para florescer</small>
+                </span>
+            </a>
+            <div class="player-status">
+                <span class="status-label">SEU SALDO</span>
+                <strong class="coin-balance">🪙 <span id="txt-moedas">50</span></strong>
             </div>
-        </div>
+        </header>
 
-        <!-- ABA 2: Cozinha -->
-        <div id="painel-cozinha" class="aba-painel">
-            <div class="content-grid">
-                <button id="fogao-1" class="fogao VAZIO"></button>
-                <button id="fogao-2" class="fogao BLOQUEADO"></button>
-                <button id="fogao-3" class="fogao BLOQUEADO"></button>
-                <button id="fogao-4" class="fogao BLOQUEADO"></button>
-                <button id="fogao-5" class="fogao BLOQUEADO"></button>
-                <button id="fogao-6" class="fogao BLOQUEADO"></button>
-                <button id="fogao-7" class="fogao BLOQUEADO"></button>
-                <button id="fogao-8" class="fogao BLOQUEADO"></button>
-                <button id="fogao-9" class="fogao BLOQUEADO"></button>
-            </div>
-        </div>
+        <main class="game-layout">
+            <section class="world-card" aria-label="Área de jogo">
+                <nav class="world-tabs" aria-label="Áreas da fazenda">
+                    <button id="btn-aba-fazenda" class="world-tab ativa" type="button">
+                        <span>🌱</span> Campo
+                    </button>
+                    <button id="btn-aba-cozinha" class="world-tab" type="button">
+                        <span>🍳</span> Cozinha
+                    </button>
+                    <button id="btn-aba-curral" class="world-tab" type="button">
+                        <span>🐄</span> Curral
+                    </button>
+                </nav>
 
-        <!-- ABA 3: Curral (Estrutura futura pronta) -->
-        <div id="painel-curral" class="aba-painel">
-            <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; color: white; padding: 10px; font-family: monospace; height: 100%;">
-                <h2 style="margin-bottom: 10px; font-size: 22px;" >🐄 Curral Paraíso</h2>
-                <p style="font-size: 14px; margin-bottom: 15px; opacity: 0.9;">Espaço reservado para os seus futuros animais!</p>
-                <div style="border: 2px dashed rgba(255,255,255,0.5); padding: 30px; border-radius: 10px; font-size: 16px;">
-                    🚧 Em Construção... 🐓🐑
+                <div class="world-content">
+                    <section id="painel-plantacao" class="aba-painel ativa">
+                        <div class="section-heading">
+                            <div>
+                                <span class="eyebrow">MÃOS À TERRA</span>
+                                <h1>Seu campo</h1>
+                                <p>Cuide das plantações e colha no tempo certo.</p>
+                            </div>
+                            <span class="heading-art" aria-hidden="true">🌤️</span>
+                        </div>
+                        <div class="content-grid field-grid" aria-label="Lotes de plantação">
+                            <button id="lote-1" class="lote VAZIO" type="button"></button>
+                            <button id="lote-2" class="lote BLOQUEADO" type="button"></button>
+                            <button id="lote-3" class="lote BLOQUEADO" type="button"></button>
+                            <button id="lote-4" class="lote BLOQUEADO" type="button"></button>
+                            <button id="lote-5" class="lote BLOQUEADO" type="button"></button>
+                            <button id="lote-6" class="lote BLOQUEADO" type="button"></button>
+                            <button id="lote-7" class="lote BLOQUEADO" type="button"></button>
+                            <button id="lote-8" class="lote BLOQUEADO" type="button"></button>
+                            <button id="lote-9" class="lote BLOQUEADO" type="button"></button>
+                        </div>
+                        <div id="seletor-sementes" class="seletor-flutuante"
+                             role="dialog" aria-label="Escolher semente"></div>
+                    </section>
+
+                    <section id="painel-cozinha" class="aba-painel">
+                        <div class="section-heading">
+                            <div>
+                                <span class="eyebrow">RECEITAS DA FAZENDA</span>
+                                <h1>Cozinha</h1>
+                                <p>Transforme sua colheita em pratos deliciosos.</p>
+                            </div>
+                            <span class="heading-art" aria-hidden="true">🥧</span>
+                        </div>
+                        <div class="content-grid cozinha-grid" aria-label="Fogões">
+                            <button id="fogao-1" class="fogao VAZIO" type="button"></button>
+                            <button id="fogao-2" class="fogao BLOQUEADO" type="button"></button>
+                            <button id="fogao-3" class="fogao BLOQUEADO" type="button"></button>
+                            <button id="fogao-4" class="fogao BLOQUEADO" type="button"></button>
+                            <button id="fogao-5" class="fogao BLOQUEADO" type="button"></button>
+                            <button id="fogao-6" class="fogao BLOQUEADO" type="button"></button>
+                            <button id="fogao-7" class="fogao BLOQUEADO" type="button"></button>
+                            <button id="fogao-8" class="fogao BLOQUEADO" type="button"></button>
+                            <button id="fogao-9" class="fogao BLOQUEADO" type="button"></button>
+                        </div>
+                        <div id="seletor-receitas" class="seletor-flutuante"
+                             role="dialog" aria-label="Escolher receita"></div>
+                    </section>
+
+                    <section id="painel-curral" class="aba-painel">
+                        <div class="barn-empty">
+                            <span aria-hidden="true">🐄</span>
+                            <span class="eyebrow">EM BREVE</span>
+                            <h1>Curral Paraíso</h1>
+                            <p>Um espaço aconchegante para os futuros moradores da fazenda.</p>
+                            <div class="coming-soon">🚧 Em construção · 🐓 🐑</div>
+                        </div>
+                    </section>
                 </div>
-            </div>
-        </div>
 
+                <footer class="world-tip">
+                    <span aria-hidden="true">✨</span>
+                    <span id="mensagem" role="status" aria-live="polite">Bem-vindo à Fazenda Paraíso!</span>
+                </footer>
+            </section>
+
+            <aside class="farm-sidebar">
+                <section class="sidebar-card inventory-card">
+                    <div class="card-heading">
+                        <div>
+                            <span class="eyebrow">O QUE VOCÊ COLHEU</span>
+                            <h2>Armazém</h2>
+                        </div>
+                        <span class="card-icon" aria-hidden="true">📦</span>
+                    </div>
+                    <div class="capacity-line">
+                        <span>Capacidade</span>
+                        <strong><span id="txt-total-estoque">0</span> / <span id="txt-max-estoque">20</span></strong>
+                    </div>
+                    <div class="barra-capacidade" aria-label="Capacidade do armazém">
+                        <div id="barra-progresso" class="barra-preenchimento"></div>
+                    </div>
+                    <div id="lista-estoque" class="inventory-list"></div>
+                </section>
+
+                <section class="sidebar-card market-card">
+                    <div class="card-heading">
+                        <div>
+                            <span class="eyebrow">TROQUE POR MOEDAS</span>
+                            <h2>Feirinha</h2>
+                        </div>
+                        <span class="card-icon" aria-hidden="true">🧺</span>
+                    </div>
+                    <p class="card-description">Venda o que colheu para investir na fazenda.</p>
+                    <div id="lista-mercado" class="market-list"></div>
+                </section>
+
+                <div class="sidebar-note">
+                    <span aria-hidden="true">🌼</span>
+                    <span>Cada dia na fazenda traz uma nova oportunidade.</span>
+                </div>
+            </aside>
+        </main>
     </div>
-</div>
 
-        <!-- SIDENAV (Armazém, Mercado e Logs) -->
-        <div class="item sidenav" style="flex-direction: column; justify-content: flex-start; padding: 15px; text-align: left; align-items: stretch;">
-            <h3 style="font-size: 18px; margin-bottom: 5px;">📦 Armazém (<span id="txt-total-estoque">0</span>/<span id="txt-max-estoque">20</span>)</h3>
-            <div style="font-size: 14px; margin-bottom: 5px;">🌾 Trigos: <span id="estoque-trigo">0</span></div>
-            <div style="font-size: 14px; margin-bottom: 10px;">🍅 Tomates: <span id="estoque-tomate">0</span></div>
-            <div style="font-size: 14px; margin-bottom: 10px;">🫘 Feijões: <span id="estoque-feijao">0</span></div>
-            <div class="barra-capacidade"><div id="barra-progresso" class="barra-preenchimento"></div></div>
-            
-            <hr style="margin: 15px 0; border: 0; border-top: 1px solid #ccc;">
-            
-            <h3 style="font-size: 18px; margin-bottom: 10px;">🏪 Loja</h3>
-            <button id="vender-trigo" class="botao-venda">Vender Trigo (+$25)</button>
-            <button id="vender-tomate" class="botao-venda">Vender Tomate (+$65)</button>
-            <button id="vender-feijao" class="botao-venda">Vender Feijão (+$120)</button>
-            
-            <div id="mensagem">Bem-vindo à Fazenda Paraíso!</div>
-        </div>
-
-                <!-- FOOTER (Barra de ferramentas das sementes e abas) -->
-        <div class="footer">
-            <div class="tools"><button id="btn-trigo" class="botao-semente ativa">🌾 Trigo ($10)</button></div>
-            <div class="tools"><button id="btn-tomate" class="botao-semente">🍅 Tomate ($25)</button></div>
-            <div class="tools"><button id="btn-feijao" class="botao-semente">🫘 Feijão ($50)</button></div>
-            
-            <!-- NOVOS BOTÕES DE NAVEGAÇÃO DE ABAS -->
-            <div class="tools"><span class="emoji-status">🔒</span><span>BLOQUEADO</span></div>
-            <div class="tools"><span class="emoji-status">🔒</span><span>BLOQUEADO</span></div>
-            <div class="tools"><span class="emoji-status">🔒</span><span>BLOQUEADO</span></div>
-        </div>
-
-    </div>
-
-    <!-- Inicializa o script controlador da lógica visual -->
-        <!-- O caractere '?' força o navegador a baixar o arquivo do zero -->
-    <script type="py" src="game.py?v=2" async></script>
-
-
+    <script type="py" src="game.py?v=6" async></script>
 </body>
 </html>
