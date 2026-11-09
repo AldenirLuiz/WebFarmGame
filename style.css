@@ -580,6 +580,11 @@ button { font: inherit; }
     box-shadow: 0 6px 16px rgba(47, 105, 50, 0.18);
 }
 .opcao-selecao:disabled { opacity: 0.55; cursor: not-allowed; }
+.opcao-selecao.acao-melhoria {
+    border-color: #dfc77d;
+    background: linear-gradient(145deg, #fff8df, #f8edc8);
+}
+.opcao-selecao.acao-melhoria .opcao-emoji { font-size: 26px; }
 .opcao-emoji {
     grid-row: 1 / span 2;
     font-size: 30px;
@@ -672,6 +677,36 @@ button { font: inherit; }
     border-radius: inherit;
     background: linear-gradient(90deg, #88b36e, #4f925d);
     transition: width 0.3s;
+}
+.botao-melhoria-armazem {
+    display: flex;
+    width: 100%;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    margin-top: 14px;
+    padding: 11px 13px;
+    border: 1px solid #dfc77d;
+    border-radius: 12px;
+    background: linear-gradient(145deg, #fff8df, #f8edc8);
+    color: #665426;
+    font: inherit;
+    font-size: 12px;
+    cursor: pointer;
+    transition: transform 0.15s, box-shadow 0.15s;
+}
+.botao-melhoria-armazem:not(:disabled):hover {
+    transform: translateY(-1px);
+    box-shadow: 0 5px 12px rgba(106, 83, 34, 0.14);
+}
+.botao-melhoria-armazem:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+.detalhe-melhoria-armazem {
+    margin: 7px 0 0;
+    color: var(--muted);
+    font-size: 11px;
 }
 .inventory-list {
     display: grid;

@@ -25,7 +25,15 @@ plantas = [
     for registro in dados_insumos["plants"]
 ]
 PLANTAS_POR_NOME = {planta.nome: planta for planta in plantas}
-jogador = Jogador(produtos=[planta.nome for planta in plantas])
+jogador = Jogador(
+    capacidade_maxima=dados_insumos["progression"][
+        "warehouse_base_capacity"
+    ],
+    produtos=[planta.nome for planta in plantas],
+    aumento_capacidade_armazem=dados_insumos["progression"][
+        "warehouse_upgrade_capacity"
+    ]
+)
 
 RECEITAS_POR_NOME = {
     registro["name"]: Receita(
@@ -54,6 +62,16 @@ ANIMAIS_POR_CHAVE = {
 }
 PRECO_BASE_LOTE = dados_insumos["progression"]["plot_base_cost"]
 PRECO_BASE_CURRAL = dados_insumos["progression"]["corral_base_cost"]
+CUSTOS_MELHORIA_CAMPO = dados_insumos["progression"]["plot_upgrade_costs"]
+REDUCAO_TEMPO_CAMPO = dados_insumos["progression"][
+    "plot_growth_reduction_per_level"
+]
+CUSTOS_MELHORIA_CURRAL = dados_insumos["progression"][
+    "corral_upgrade_costs"
+]
+CUSTOS_MELHORIA_ARMAZEM = dados_insumos["progression"][
+    "warehouse_upgrade_costs"
+]
 selecao_atual = None
 ultimo_salvamento_progresso = 0
 notificacoes_ativas = {
@@ -72,9 +90,12 @@ TEMPO_AVISO_ABA = 4
 
 # Criados os 9 lotes conforme seu arquivo atualizado
 lotes = [
-    LoteTerra(1, comprado=True),
-    LoteTerra(2), LoteTerra(3), LoteTerra(4), LoteTerra(5), LoteTerra(6),
-    LoteTerra(7), LoteTerra(8), LoteTerra(9)
+    LoteTerra(
+        id_lote,
+        comprado=id_lote == 1,
+        reducao_tempo_por_nivel=REDUCAO_TEMPO_CAMPO
+    )
+    for id_lote in range(1, 10)
 ]
 fogoes = [
     Fogao(1, comprado=True),
@@ -243,6 +264,10 @@ def carregar_jogo():
 
         # Restaura os dados básicos
         jogador.moedas = int(dados["moedas"])
+        jogador.nivel_melhoria_armazem = min(
+            max(int(dados.get("nivel_melhoria_armazem", 0)), 0),
+            len(CUSTOS_MELHORIA_ARMAZEM)
+        )
 
         armazem_salvo = dados.get("armazem", {})
         jogador.armazem = {
@@ -266,6 +291,7 @@ def carregar_jogo():
                 lote.estado = "VAZIO" if comprado else "BLOQUEADO"
                 lote.planta_atual = None
                 lote.timestamp_plantio = None
+                lote.nivel_melhoria = 0
 
         else:
             for i, lote in enumerate(lotes):
@@ -276,11 +302,16 @@ def carregar_jogo():
                 salvo = lotes_salvos[i]
 
                 lote.comprado = salvo["comprado"]
+                lote.nivel_melhoria = min(
+                    max(int(salvo.get("nivel_melhoria", 0)), 0),
+                    len(CUSTOS_MELHORIA_CAMPO)
+                )
 
                 if not lote.comprado:
                     lote.estado = "BLOQUEADO"
                     lote.planta_atual = None
                     lote.timestamp_plantio = None
+                    lote.nivel_melhoria = 0
                     continue
 
                 estado = salvo["estado"]
@@ -338,12 +369,17 @@ def carregar_jogo():
 
             salvo = currais_salvos[i]
             curral.comprado = bool(salvo["comprado"])
+            curral.nivel_melhoria = min(
+                max(int(salvo.get("nivel_melhoria", 0)), 0),
+                len(CUSTOS_MELHORIA_CURRAL)
+            )
             curral.animal = None
             curral.animais = []
             if not curral.comprado:
                 curral.alimentado = False
                 curral.proxima_alimentacao = None
                 curral.proxima_reproducao = None
+                curral.nivel_melhoria = 0
                 continue
 
             chave_animal = salvo.get("animal")
@@ -385,14 +421,16 @@ def carregar_jogo():
 def salvar_jogo():
     global ultimo_salvamento_progresso
     dados_salvamento = {
-        "versao": 4,
+        "versao": 6,
         "moedas": jogador.moedas,
         "armazem": jogador.armazem,
+        "nivel_melhoria_armazem": jogador.nivel_melhoria_armazem,
         "lotes": [
             {
                 "id": lote.id_lote,
                 "comprado": lote.comprado,
                 "estado": lote.estado,
+                "nivel_melhoria": lote.nivel_melhoria,
                 "planta": (
                     lote.planta_atual.nome
                     if lote.planta_atual else None
@@ -419,6 +457,7 @@ def salvar_jogo():
                 "id": curral.id_curral,
                 "comprado": curral.comprado,
                 "animal": curral.animal.chave if curral.animal else None,
+                "nivel_melhoria": curral.nivel_melhoria,
                 "idades": curral.animais,
                 "alimentado": curral.alimentado,
                 "ultima_atualizacao": curral.ultima_atualizacao,
@@ -447,6 +486,16 @@ def ao_vender_planta(event):
     chave = event.currentTarget.id.removeprefix("vender-").capitalize()
     planta = PLANTAS_POR_NOME[chave]
     vender(planta.nome, planta.valor_venda, planta.nome_exibicao)
+
+
+def ao_melhorar_armazem(event):
+    sucesso, mensagem = jogador.melhorar_armazem(
+        CUSTOS_MELHORIA_ARMAZEM
+    )
+    mostrar_mensagem(mensagem)
+    if sucesso:
+        salvar_jogo()
+    atualizar_tela()
 
 
 def inicializar_controles_dinamicos():
@@ -481,6 +530,71 @@ def fechar_seletor():
     selecao_atual = None
 
 
+def opcao_melhoria_campo(lote):
+    nivel_maximo = len(CUSTOS_MELHORIA_CAMPO)
+    no_maximo = lote.nivel_melhoria >= nivel_maximo
+    custo = (
+        CUSTOS_MELHORIA_CAMPO[lote.nivel_melhoria]
+        if not no_maximo else 0
+    )
+    pode_comprar = not no_maximo and jogador.moedas >= custo
+    status = (
+        "Nível máximo"
+        if no_maximo else
+        f"Próximo nível: {custo} moedas"
+        if pode_comprar else
+        "Moedas insuficientes"
+    )
+    atributo_disabled = "" if pode_comprar else "disabled"
+    return (
+        '<button class="opcao-selecao acao-melhoria" '
+        'data-action="upgrade-field" '
+        f'{atributo_disabled}>'
+        '<span class="opcao-emoji">🌿</span>'
+        '<span class="opcao-nome">Melhorar campo</span>'
+        f'<span class="opcao-detalhe">Nível '
+        f'{lote.nivel_melhoria}/{nivel_maximo} · '
+        f'{REDUCAO_TEMPO_CAMPO:.0%} menos tempo por nível</span>'
+        f'<span class="opcao-status">{status}</span>'
+        '</button>'
+    )
+
+
+def opcao_melhoria_curral(curral):
+    nivel_maximo = len(CUSTOS_MELHORIA_CURRAL)
+    no_maximo = curral.nivel_melhoria >= nivel_maximo
+    custo = (
+        CUSTOS_MELHORIA_CURRAL[curral.nivel_melhoria]
+        if not no_maximo else 0
+    )
+    pode_comprar = not no_maximo and jogador.moedas >= custo
+    status = (
+        "Nível máximo"
+        if no_maximo else
+        f"Próximo nível: {custo} moedas"
+        if pode_comprar else
+        "Moedas insuficientes"
+    )
+    capacidade = (
+        f"{curral.capacidade_maxima} → {curral.capacidade_maxima + 1}"
+        if curral.animal is not None
+        else "+1 vaga para qualquer espécie"
+    )
+    atributo_disabled = "" if pode_comprar else "disabled"
+    return (
+        '<button class="opcao-selecao acao-melhoria" '
+        'data-action="upgrade-corral" '
+        f'{atributo_disabled}>'
+        '<span class="opcao-emoji">🏡</span>'
+        '<span class="opcao-nome">Melhorar baia</span>'
+        f'<span class="opcao-detalhe">Nível '
+        f'{curral.nivel_melhoria}/{nivel_maximo} · {capacidade}. '
+        'Mais vagas também exigem mais ração.</span>'
+        f'<span class="opcao-status">{status}</span>'
+        '</button>'
+    )
+
+
 def abrir_seletor(tipo, objeto):
     global selecao_atual
     fechar_seletor()
@@ -491,8 +605,11 @@ def abrir_seletor(tipo, objeto):
         opcoes = []
         for planta in plantas:
             pode_comprar = jogador.moedas >= planta.custo
+            tempo_crescimento = int(
+                objeto.tempo_crescimento_planta(planta) + 0.999
+            )
             status = (
-                f"Cresce em {planta.tempo_crescimento}s"
+                f"Cresce em {tempo_crescimento}s"
                 if pode_comprar else "Moedas insuficientes"
             )
             atributo_disabled = "" if pode_comprar else "disabled"
@@ -505,6 +622,7 @@ def abrir_seletor(tipo, objeto):
                 f'<span class="opcao-detalhe">Semente: {planta.custo} '
                 f'moedas · {status}</span></button>'
             )
+        opcoes.append(opcao_melhoria_campo(objeto))
         titulo = f"Escolha uma semente para o lote {objeto.id_lote}"
     elif tipo == "receita":
         painel = document.querySelector("#seletor-receitas")
@@ -568,6 +686,7 @@ def abrir_seletor(tipo, objeto):
                     f'Venda adulta: {animal.valor_venda} · {status}</span>'
                     '</button>'
                 )
+            opcoes.append(opcao_melhoria_curral(objeto))
             titulo = f"Escolha um animal para a baia {objeto.id_curral}"
         else:
             animal = objeto.animal
@@ -589,7 +708,7 @@ def abrir_seletor(tipo, objeto):
             habilitar_venda = adultos > 0
             atributo_venda_disabled = "" if habilitar_venda else "disabled"
             pode_comprar = (
-                len(objeto.animais) < animal.capacidade
+                len(objeto.animais) < objeto.capacidade_maxima
                 and jogador.moedas >= animal.custo
             )
             atributo_compra_disabled = "" if pode_comprar else "disabled"
@@ -598,7 +717,8 @@ def abrir_seletor(tipo, objeto):
                     '<div class="detalhe-animal">'
                     f'<span class="opcao-emoji">{escape(animal.emoji)}</span>'
                     f'<strong>{escape(animal.nome)} · '
-                    f'{len(objeto.animais)}/{animal.capacidade}</strong>'
+                    f'{len(objeto.animais)}/'
+                    f'{objeto.capacidade_maxima}</strong>'
                     f'<span>{adultos} adulto(s) · '
                     f'{len(objeto.animais) - adultos} filhote(s)</span>'
                     f'<span>{status_alimentacao} · Próxima ração: '
@@ -623,6 +743,7 @@ def abrir_seletor(tipo, objeto):
                     'adultos e espaço na baia.</span></button>'
                 )
             ]
+            opcoes.append(opcao_melhoria_curral(objeto))
             titulo = f"Baia {objeto.id_curral}"
 
     painel.innerHTML = (
@@ -650,7 +771,15 @@ def escolher_opcao(event):
 
     tipo, objeto = selecao_atual
     acao = alvo.getAttribute("data-action")
-    if tipo == "semente":
+    if acao == "upgrade-field":
+        sucesso, mensagem = objeto.melhorar(
+            jogador, CUSTOS_MELHORIA_CAMPO
+        )
+    elif acao == "upgrade-corral":
+        sucesso, mensagem = objeto.melhorar(
+            jogador, CUSTOS_MELHORIA_CURRAL
+        )
+    elif tipo == "semente":
         chave = alvo.getAttribute("data-chave")
         planta = PLANTAS_POR_NOME[chave]
         sucesso, mensagem = objeto.plantar(planta, jogador)
@@ -682,6 +811,30 @@ def atualizar_tela():
     document.querySelector("#txt-moedas").innerText = str(jogador.moedas)
     document.querySelector("#txt-total-estoque").innerText = str(total)
     document.querySelector("#txt-max-estoque").innerText = str(jogador.capacidade_maxima)
+    botao_melhoria_armazem = document.querySelector(
+        "#btn-melhorar-armazem"
+    )
+    nivel_maximo_armazem = len(CUSTOS_MELHORIA_ARMAZEM)
+    if jogador.nivel_melhoria_armazem >= nivel_maximo_armazem:
+        botao_melhoria_armazem.disabled = True
+        document.querySelector(
+            "#txt-custo-armazem"
+        ).innerText = "Nível máximo"
+    else:
+        custo_armazem = CUSTOS_MELHORIA_ARMAZEM[
+            jogador.nivel_melhoria_armazem
+        ]
+        botao_melhoria_armazem.disabled = jogador.moedas < custo_armazem
+        document.querySelector(
+            "#txt-custo-armazem"
+        ).innerText = f"{custo_armazem} moedas"
+    document.querySelector(
+        "#txt-nivel-armazem"
+    ).innerText = (
+        f"Nível {jogador.nivel_melhoria_armazem}/"
+        f"{nivel_maximo_armazem} · +"
+        f"{jogador.aumento_capacidade_armazem} espaços por melhoria"
+    )
 
     porcentagem = (total / jogador.capacidade_maxima) * 100
     document.querySelector("#barra-progresso").style.width = f"{porcentagem}%"
@@ -712,12 +865,32 @@ def atualizar_tela():
         if lote.comprado:
             elemento.className = f"lote {lote.estado}"
             if lote.estado == "VAZIO":
-                conteudo = '<span class="emoji-status">🟫</span><span>TERRA</span><span class="tempo-txt">Clique para plantar</span>'
+                conteudo = (
+                    '<span class="emoji-status">🟫</span>'
+                    '<span>TERRA</span>'
+                    f'<span class="tempo-txt">Melhoria '
+                    f'{lote.nivel_melhoria}/'
+                    f'{len(CUSTOS_MELHORIA_CAMPO)} · '
+                    'Clique para plantar</span>'
+                )
             elif lote.estado == "PLANTADO":
                 restante = lote.tempo_restante()
-                conteudo = f'<span class="emoji-status">{lote.planta_atual.emoji}</span><span>{lote.planta_atual.nome_exibicao}</span><span class="tempo-txt">Crescendo: {restante}s</span>'
+                conteudo = (
+                    f'<span class="emoji-status">'
+                    f'{lote.planta_atual.emoji}</span>'
+                    f'<span>{lote.planta_atual.nome_exibicao}</span>'
+                    f'<span class="tempo-txt">Crescendo: {restante}s · '
+                    f'Nível {lote.nivel_melhoria}</span>'
+                )
             else:
-                conteudo = f'<span class="emoji-status">{lote.planta_atual.emoji}</span><span>COLHER {lote.planta_atual.nome_exibicao}</span>'
+                conteudo = (
+                    f'<span class="emoji-status">'
+                    f'{lote.planta_atual.emoji}</span>'
+                    f'<span>COLHER '
+                    f'{lote.planta_atual.nome_exibicao}</span>'
+                    f'<span class="tempo-txt">Nível '
+                    f'{lote.nivel_melhoria}</span>'
+                )
         elif lote.id_lote == proximo_lote:
             elemento.className = "lote DISPONIVEL"
             conteudo = f'<span class="emoji-status">🪙</span><span>COMPRAR LOTE</span><span class="tempo-txt">{preco_lote(lote.id_lote)} moedas</span>'
@@ -806,7 +979,10 @@ def atualizar_tela():
             conteudo = (
                 '<span class="emoji-status">🛖</span>'
                 '<span>BAIA LIVRE</span>'
-                '<span class="tempo-txt">Clique para escolher animais</span>'
+                f'<span class="tempo-txt">Melhoria '
+                f'{curral.nivel_melhoria}/'
+                f'{len(CUSTOS_MELHORIA_CURRAL)} · '
+                'Clique para escolher animais</span>'
             )
         else:
             animal = curral.animal
@@ -826,10 +1002,12 @@ def atualizar_tela():
             conteudo = (
                 f'<span class="emoji-status">{escape(animal.emoji)}</span>'
                 f'<span>{escape(animal.nome)} · '
-                f'{len(curral.animais)}/{animal.capacidade}</span>'
+                f'{len(curral.animais)}/'
+                f'{curral.capacidade_maxima}</span>'
                 f'<span class="tempo-txt">{status_crescimento} · '
                 f'{filhotes} filhote(s)</span>'
-                f'<span class="tempo-txt">{status_alimentacao}</span>'
+                f'<span class="tempo-txt">{status_alimentacao} · '
+                f'Nível {curral.nivel_melhoria}</span>'
             )
         elemento.innerHTML = conteudo
 
@@ -1002,6 +1180,11 @@ def inicializar_botoes():
         elemento = document.querySelector(seletor)
         if elemento is not None:
             registrar_evento(elemento, "click", funcao)
+    registrar_evento(
+        document.querySelector("#btn-melhorar-armazem"),
+        "click",
+        ao_melhorar_armazem
+    )
 
     for seletor in (
         "#seletor-sementes", "#seletor-receitas", "#seletor-animais"

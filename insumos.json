@@ -35,6 +35,24 @@
             "cost": 75,
             "time_to_harvest": 120,
             "sale_value": 180
+        },
+        {
+            "id": 5,
+            "key": "Milho",
+            "name": "Milho",
+            "emoji": "🌽",
+            "cost": 35,
+            "time_to_harvest": 60,
+            "sale_value": 85
+        },
+        {
+            "id": 6,
+            "key": "Cenoura",
+            "name": "Cenoura",
+            "emoji": "🥕",
+            "cost": 30,
+            "time_to_harvest": 45,
+            "sale_value": 75
         }
     ],
     "recipes": [
@@ -64,11 +82,48 @@
             "sale_value": 100,
             "cook_time": 8,
             "emoji": "🥖"
+        },
+        {
+            "name": "Bolo de Milho",
+            "ingredients": {
+                "Milho": 3,
+                "Trigo": 2
+            },
+            "sale_value": 340,
+            "cook_time": 15,
+            "emoji": "🍰"
+        },
+        {
+            "name": "Sopa de Cenoura",
+            "ingredients": {
+                "Cenoura": 3,
+                "Tomate": 2
+            },
+            "sale_value": 390,
+            "cook_time": 12,
+            "emoji": "🥣"
+        },
+        {
+            "name": "Ensopado da Fazenda",
+            "ingredients": {
+                "Feijao": 2,
+                "Cenoura": 2,
+                "Milho": 2
+            },
+            "sale_value": 480,
+            "cook_time": 18,
+            "emoji": "🍲"
         }
     ],
     "progression": {
         "plot_base_cost": 200,
-        "corral_base_cost": 250
+        "corral_base_cost": 250,
+        "plot_upgrade_costs": [350, 900],
+        "plot_growth_reduction_per_level": 0.1,
+        "corral_upgrade_costs": [500, 1200],
+        "warehouse_base_capacity": 20,
+        "warehouse_upgrade_capacity": 10,
+        "warehouse_upgrade_costs": [400, 1000, 2200]
     },
     "animals": [
         {
@@ -112,6 +167,34 @@
             "reproduction_time": 140,
             "max_per_corral": 4,
             "sale_value": 620
+        },
+        {
+            "key": "Porco",
+            "name": "Porco",
+            "emoji": "🐖",
+            "cost": 220,
+            "feed": {
+                "Milho": 2
+            },
+            "feed_interval": 20,
+            "growth_time": 110,
+            "reproduction_time": 160,
+            "max_per_corral": 3,
+            "sale_value": 700
+        },
+        {
+            "key": "Cabra",
+            "name": "Cabra",
+            "emoji": "🐐",
+            "cost": 180,
+            "feed": {
+                "Cenoura": 2
+            },
+            "feed_interval": 22,
+            "growth_time": 85,
+            "reproduction_time": 130,
+            "max_per_corral": 3,
+            "sale_value": 520
         }
     ]
 }

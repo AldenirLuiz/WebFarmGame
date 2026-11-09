@@ -4,13 +4,40 @@ from time import time
 
 class Jogador:
     def __init__(
-        self, moedas_iniciais=50, capacidade_maxima=20, produtos=None
+        self, moedas_iniciais=50, capacidade_maxima=20, produtos=None,
+        aumento_capacidade_armazem=10
     ):
         self.moedas = moedas_iniciais
         if produtos is None:
             produtos = ("Trigo", "Tomate", "Feijao")
         self.armazem = {produto: 0 for produto in produtos}
-        self.capacidade_maxima = capacidade_maxima
+        self.capacidade_base_armazem = capacidade_maxima
+        self.aumento_capacidade_armazem = aumento_capacidade_armazem
+        self.nivel_melhoria_armazem = 0
+
+    @property
+    def capacidade_maxima(self):
+        return (
+            self.capacidade_base_armazem
+            + self.nivel_melhoria_armazem
+            * self.aumento_capacidade_armazem
+        )
+
+    def melhorar_armazem(self, custos):
+        if self.nivel_melhoria_armazem >= len(custos):
+            return False, "O armazém já atingiu o nível máximo."
+
+        custo = custos[self.nivel_melhoria_armazem]
+        if self.moedas < custo:
+            return False, "Moedas insuficientes para melhorar o armazém."
+
+        self.moedas -= custo
+        self.nivel_melhoria_armazem += 1
+        return True, (
+            f"Armazém melhorado para o nível "
+            f"{self.nivel_melhoria_armazem}! Capacidade aumentada em "
+            f"{self.aumento_capacidade_armazem} itens."
+        )
 
     def total_itens_no_armazem(self):
         return sum(self.armazem.values())
@@ -71,12 +98,40 @@ class Receita:
         self.tempo_cozimento = tempo_cozimento
 
 class LoteTerra:
-    def __init__(self, id_lote, comprado=False):
+    def __init__(
+        self, id_lote, comprado=False, reducao_tempo_por_nivel=0.1
+    ):
         self.id_lote = id_lote
         self.comprado = comprado
         self.estado = "VAZIO" if comprado else "BLOQUEADO"
         self.planta_atual = None
         self.timestamp_plantio = None
+        self.nivel_melhoria = 0
+        self.reducao_tempo_por_nivel = reducao_tempo_por_nivel
+
+    def tempo_crescimento_planta(self, planta):
+        reducao = self.reducao_tempo_por_nivel * self.nivel_melhoria
+        return planta.tempo_crescimento * (1 - reducao)
+
+    def melhorar(self, jogador, custos):
+        if not self.comprado:
+            return False, "Este lote ainda não foi comprado."
+        if self.estado != "VAZIO":
+            return False, "Colha a plantação antes de melhorar este lote."
+        if self.nivel_melhoria >= len(custos):
+            return False, "Este lote já atingiu o nível máximo."
+
+        custo = custos[self.nivel_melhoria]
+        if jogador.moedas < custo:
+            return False, "Moedas insuficientes para melhorar este lote."
+
+        jogador.moedas -= custo
+        self.nivel_melhoria += 1
+        return True, (
+            f"Lote {self.id_lote} melhorado para o nível "
+            f"{self.nivel_melhoria}! As plantas crescem "
+            f"{self.reducao_tempo_por_nivel:.0%} mais rápido por nível."
+        )
 
     def plantar(self, planta, jogador):
         if not self.comprado:
@@ -95,7 +150,7 @@ class LoteTerra:
         if self.estado != "PLANTADO" or self.planta_atual is None:
             return False
         decorrido = time() - self.timestamp_plantio
-        if decorrido >= self.planta_atual.tempo_crescimento:
+        if decorrido >= self.tempo_crescimento_planta(self.planta_atual):
             self.estado = "PRONTO"
             return True
         return False
@@ -103,7 +158,9 @@ class LoteTerra:
     def tempo_restante(self):
         if self.estado != "PLANTADO" or self.planta_atual is None:
             return 0
-        restante = self.planta_atual.tempo_crescimento - (time() - self.timestamp_plantio)
+        restante = self.tempo_crescimento_planta(self.planta_atual) - (
+            time() - self.timestamp_plantio
+        )
         return max(0, int(restante + 0.999))
 
     def colher(self, jogador):
@@ -199,6 +256,30 @@ class Curral:
         self.ultima_atualizacao = time()
         self.proxima_alimentacao = None
         self.proxima_reproducao = None
+        self.nivel_melhoria = 0
+
+    @property
+    def capacidade_maxima(self):
+        if self.animal is None:
+            return 0
+        return self.animal.capacidade + self.nivel_melhoria
+
+    def melhorar(self, jogador, custos):
+        if not self.comprado:
+            return False, "Esta baia ainda não foi comprada."
+        if self.nivel_melhoria >= len(custos):
+            return False, "Esta baia já atingiu o nível máximo."
+
+        custo = custos[self.nivel_melhoria]
+        if jogador.moedas < custo:
+            return False, "Moedas insuficientes para melhorar esta baia."
+
+        jogador.moedas -= custo
+        self.nivel_melhoria += 1
+        return True, (
+            f"Baia {self.id_curral} melhorada para o nível "
+            f"{self.nivel_melhoria}! Capacidade aumentada em 1 animal."
+        )
 
     def comprar_animal(self, animal, jogador):
         if not self.comprado:
@@ -220,7 +301,7 @@ class Curral:
     def adicionar_animal(self, jogador):
         if self.animal is None:
             return False, "Escolha um animal para esta baia primeiro."
-        if len(self.animais) >= self.animal.capacidade:
+        if len(self.animais) >= self.capacidade_maxima:
             return False, "Esta baia já atingiu sua capacidade."
         if jogador.moedas < self.animal.custo:
             return False, "Moedas insuficientes para comprar este animal."
@@ -307,7 +388,7 @@ class Curral:
             self.proxima_reproducao = agora + self.animal.tempo_reproducao
         elif (
             self.alimentado
-            and len(self.animais) < self.animal.capacidade
+            and len(self.animais) < self.capacidade_maxima
             and agora >= self.proxima_reproducao
         ):
             self.animais.append(0.0)

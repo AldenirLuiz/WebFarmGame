@@ -62,7 +62,7 @@
                         </div>
                         <div class="progress-summary">
                             <span>🌿 <strong id="txt-lotes-comprados">1</strong> lotes abertos</span>
-                            <span>Desbloqueie novos espaços com moedas</span>
+                            <span>Melhorias reduzem o crescimento em até 20%</span>
                         </div>
                         <div class="content-grid field-grid" aria-label="Lotes de plantação">
                             <button id="lote-1" class="lote VAZIO" type="button"></button>
@@ -114,7 +114,7 @@
                         </div>
                         <div class="progress-summary">
                             <span>🐾 <strong id="txt-currais-comprados">1</strong> baias abertas</span>
-                            <span>Com dois adultos e espaço, a baia ganha filhotes</span>
+                            <span>Mais vagas também exigem mais ração</span>
                         </div>
                         <div class="content-grid curral-grid" aria-label="Baias de animais">
                             <button id="curral-1" class="curral VAZIO" type="button"></button>
@@ -154,6 +154,14 @@
                     <div class="barra-capacidade" aria-label="Capacidade do armazém">
                         <div id="barra-progresso" class="barra-preenchimento"></div>
                     </div>
+                    <button id="btn-melhorar-armazem"
+                            class="botao-melhoria-armazem" type="button">
+                        <span>📦 Melhorar armazém</span>
+                        <strong id="txt-custo-armazem">400 moedas</strong>
+                    </button>
+                    <p id="txt-nivel-armazem" class="detalhe-melhoria-armazem">
+                        Nível 0/3 · +10 espaços por melhoria
+                    </p>
                     <div id="lista-estoque" class="inventory-list"></div>
                 </section>
 
@@ -177,6 +185,6 @@
         </main>
     </div>
 
-    <script type="py" src="game.py?v=9" async></script>
+    <script type="py" src="game.py?v=11" async></script>
 </body>
 </html>
